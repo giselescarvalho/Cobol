@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. COB5.
+       PROGRAM-ID. COB7.
       ******************************************************************
       * Author: Gisele Carvalho
       * Date: 16/03/2021
@@ -34,4 +34,4 @@
             DISPLAY 'SUBTRACAO : ' WRK-RESUL-ED.
 
            STOP RUN.
-       END PROGRAM COB5.
+       END PROGRAM COB7.
