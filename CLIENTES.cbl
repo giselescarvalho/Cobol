@@ -13,10 +13,10 @@
        FILE-CONTROL.
            SELECT CLIENTES
                ASSIGN TO 'C:\Users\Gisele\Desktop\Cobol\CLIENTE.DAT'
-             ORGANIZATION IS INDEXED
-           ACCESS MODE IS RANDOM
-           FILE STATUS IS CLIENTES-STATUS
-           RECORD KEY IS CLIENTES-CHAVE.
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS RANDOM
+               FILE STATUS IS CLIENTES-STATUS
+               RECORD KEY IS CLIENTES-CHAVE.
        DATA DIVISION.
        FILE SECTION.
        FD CLIENTES.
@@ -28,7 +28,7 @@
 
        WORKING-STORAGE SECTION.
        77 WRK-OPCAO PIC X(1).
-       77 WRK-MODULO PIC X(20).
+       77 WRK-MODULO PIC X(25).
        77 WRK-TECLA PIC X(1).
        77 CLIENTES-STATUS PIC 9(02).
        SCREEN SECTION.
@@ -36,7 +36,7 @@
            05 LIMPA-TELA.
                10 BLANK SCREEN.
                10 LINE 01 COLUMN 01 PIC X(20) ERASE EOL
-                   BACKGROUND-COLOR 3 FOREGROUND-COLOR 4 FROM '   MENU'.
+                   BACKGROUND-COLOR 3 FOREGROUND-COLOR 4 FROM 'MENU'.
                10 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                    BACKGROUND-COLOR 1 FROM WRK-MODULO.
 
@@ -50,6 +50,17 @@
            05 LINE 13 COLUMN 15 VALUE 'OPÇÃO: ' .
            05 LINE 14 COLUMN 26 USING WRK-OPCAO.
 
+       01 TELA-REGISTRO.
+           05 CHAVE FOREGROUND-COLOR 2.
+               10 LINE 10 COLUMN 10 VALUE 'TELEFONE'.
+               10 COLUMN PLUS 2 PIC 9(09) USING CLIENTES-FONE
+                   BLANK WHEN ZEROS.
+           05 SS-DADOS.
+               10 LINE 11 COLUMN 10 VALUE 'NOME'.
+               10 COLUMN PLUS 2 PIC X(30) USING CLIENTES-NOME.
+               10 LINE 12 COLUMN 10 VALUE 'EMAIL'.
+               10 COLUMN PLUS 2 PIC X(40) USING CLIENTES-EMAIL.
+
        PROCEDURE DIVISION.
        0000-PRINCIPAL SECTION.
            PERFORM 1000-INICIAR.
@@ -58,13 +69,14 @@
            STOP RUN.
 
        1000-INICIAR.
-           OPEN I-O CLIENTES.
+           OPEN I-O CLIENTES
              IF CLIENTES-STATUS = 35 THEN
                  OPEN OUTPUT CLIENTES
                  CLOSE CLIENTES
              END-IF.
            DISPLAY  TELA.
            ACCEPT MENU.
+
        2000-PROCESSAR.
            EVALUATE WRK-OPCAO
                WHEN 1
@@ -84,11 +96,13 @@
            END-EVALUATE.
 
        3000-FINALIZAR.
-           CONTINUE.
+           CLOSE CLIENTES.
 
        5000-INCLUIR.
            MOVE 'MODULO-INCLUSAO ' TO WRK-MODULO.
            DISPLAY TELA.
-           ACCEPT WRK-TECLA AT 1620.
-
+            ACCEPT TELA-REGISTRO.
+            WRITE CLIENTES-REG.
+            DISPLAY  TELA.
+           ACCEPT MENU.
       *END PROGRAM SegPartProg03.cbl
