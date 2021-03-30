@@ -3,7 +3,8 @@
       ******************************************************************
       * Author: Gisele Carvalho
       * Date: 23/03/2021
-      * Purpose: Cobol parte 2: Alura - Encerrando menu
+      * Purpose: Cobol parte 2: Alura - Manutenção de Registros
+      *           Consultando registros
       *           Modo Batch - diretamente acessado
       * Tectonics: cobc
       ******************************************************************
@@ -124,3 +125,17 @@
                    MOVE 'JA EXISTE ' TO WRK-MSGERRO
                    ACCEPT MOSTRA-ERRO
                 END-WRITE.
+
+       6000-CONSULTAR.
+             MOVE 'MODULO - CONSULTA ' TO WRK-MODULO.
+             DISPLAY TELA.
+               DISPLAY TELA-REGISTRO.
+               ACCEPT CHAVE.
+                READ CLIENTES
+                  INVALID KEY
+                   MOVE 'NAO ENCONTRADO   '  TO WRK-MSGERRO
+                  NOT INVALID KEY
+                  MOVE '--  ENCONTRADO  --'  TO WRK-MSGERRO
+                   DISPLAY SS-DADOS
+                 END-READ.
+                   ACCEPT MOSTRA-ERRO.
