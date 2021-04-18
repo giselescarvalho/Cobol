@@ -3,8 +3,8 @@
       ******************************************************************
       * Author: Gisele Carvalho
       * Date: 18/04/2021
-      * Purpose: Cobol parte 2: Alura - Manutenção de Registros
-      *           Alterando registros
+      * Purpose: Cobol parte 2: Alura - Criando relatórios
+      *           Gerando relatórios em tela
       *           Modo Batch - diretamente acessado
       * Tectonics: cobc
       ******************************************************************
@@ -14,9 +14,9 @@
            SELECT CLIENTES
              ASSIGN TO 'C:\Users\Gisele\Desktop\Cobol\CLIENTES.DAT'
                ORGANIZATION IS INDEXED
-               ACCESS MODE IS RANDOM
-               FILE STATUS IS CLIENTES-STATUS
-               RECORD KEY IS  CLIENTES-CHAVE.
+      * ACCESS MODE IS RANDOM
+             FILE STATUS IS CLIENTES-STATUS
+             RECORD KEY IS  CLIENTES-CHAVE.
        DATA DIVISION.
        FILE SECTION.
        FD CLIENTES.
@@ -26,14 +26,14 @@
             05 CLIENTES-NOME     PIC X(30).
             05 CLIENTES-EMAIL    PIC X(40).
 
-
-
        WORKING-STORAGE SECTION.
        77 WRK-OPCAO       PIC X(1).
        77 WRK-MODULO      PIC X(25).
        77 WRK-TECLA       PIC X(1).
        77 CLIENTES-STATUS PIC 9(02).
        77 WRK-MSGERRO     PIC X(30).
+       77 WRK-CONTALINHA  PIC 9(03) VALUE 0.
+       77 WRK-QTREGISTROS PIC 9(05) VALUE 0.
 
        SCREEN SECTION.
        01 TELA.
@@ -108,7 +108,7 @@
               WHEN 4
                 PERFORM 8000-EXCLUIR
               WHEN 5
-                CONTINUE
+                PERFORM 9000-RELATORIOTELA
               WHEN OTHER
                 IF WRK-OPCAO NOT EQUAL 'X'
                     DISPLAY 'ENTRE COM OPCAO CORRETA'
@@ -116,11 +116,8 @@
             END-EVALUATE.
               PERFORM 1100-MONTATELA.
 
-
-
        3000-FINALIZAR.
              CLOSE CLIENTES.
-
 
 
        5000-INCLUIR.
@@ -168,7 +165,6 @@
                       ACCEPT MOSTRA-ERRO
                 END-IF.
 
-
        8000-EXCLUIR.
              MOVE 'MODULO - EXCLUSAO ' TO WRK-MODULO.
              DISPLAY TELA.
@@ -189,3 +185,38 @@
                             ACCEPT  MOSTRA-ERRO
                           END-DELETE
                      END-IF.
+
+       9000-RELATORIOTELA.
+             MOVE 'MODULO - RELATORIO ' TO WRK-MODULO.
+             DISPLAY TELA.
+             MOVE 12345 TO CLIENTES-FONE.
+             START CLIENTES KEY EQUAL CLIENTES-FONE.
+             READ CLIENTES
+                 INVALID KEY
+                     MOVE 'NENHUM REGISTRO ENCONTRADO' TO WRK-MSGERRO
+                  NOT INVALID KEY
+                   DISPLAY '   RELATORIO DE CLIENTES '
+                   DISPLAY '----------------------'
+                   PERFORM UNTIL CLIENTES-STATUS = 10
+                     ADD 1 TO WRK-QTREGISTROS
+                     DISPLAY CLIENTES-FONE ' '
+                           CLIENTES-NOME ' '
+                           CLIENTES-EMAIL
+                     READ CLIENTES NEXT
+
+                       ADD 1 TO WRK-CONTALINHA
+                     IF WRK-CONTALINHA = 5
+                         MOVE 'PRESSIONE ALGUMA TECLA ' TO WRK-MSGERRO
+                         ACCEPT MOSTRA-ERRO
+                        MOVE 'MODULO - RELATORIO ' TO WRK-MODULO
+                        DISPLAY TELA
+                        DISPLAY '   RELATORIO DE CLIENTES '
+                        DISPLAY '----------------------'
+                        MOVE 0 TO WRK-CONTALINHA
+                     END-IF
+
+                   END-PERFORM
+             END-READ.
+               MOVE 'REGISTROS LIDOS ' TO WRK-MSGERRO.
+               MOVE WRK-QTREGISTROS TO WRK-MSGERRO(17:05).
+               ACCEPT MOSTRA-ERRO.
