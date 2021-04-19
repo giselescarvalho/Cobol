@@ -4,7 +4,7 @@
       * Author: Gisele Carvalho
       * Date: 18/04/2021
       * Purpose: Cobol parte 2: Alura - Criando relatórios
-      *           Gerando relatórios em tela
+      *           Gerando relatórios em disco
       *           Modo Batch - diretamente acessado
       * Tectonics: cobc
       ******************************************************************
@@ -17,6 +17,9 @@
       * ACCESS MODE IS RANDOM
              FILE STATUS IS CLIENTES-STATUS
              RECORD KEY IS  CLIENTES-CHAVE.
+             SELECT RELATO
+               ASSIGN TO 'C:\Users\Gisele\Desktop\Cobol\RELATO.TXT'
+             ORGANIZATION IS SEQUENTIAL.
        DATA DIVISION.
        FILE SECTION.
        FD CLIENTES.
@@ -25,6 +28,10 @@
                 10 CLIENTES-FONE PIC 9(09).
             05 CLIENTES-NOME     PIC X(30).
             05 CLIENTES-EMAIL    PIC X(40).
+
+       FD RELATO.
+       01 RELATO-REG.
+          05 RELATO-DADOS  PIC X(79).
 
        WORKING-STORAGE SECTION.
        77 WRK-OPCAO       PIC X(1).
@@ -56,7 +63,7 @@
             05 LINE 13 COLUMN 15 VALUE 'OPCAO......: ' .
             05 LINE 13 COLUMN 28 USING WRK-OPCAO.
 
-       01 TELA-REGISTRO.
+        01 TELA-REGISTRO.
             05 CHAVE FOREGROUND-COLOR 2.
                10 LINE 10 COLUMN 10 VALUE 'TELEFONE '.
                10 COLUMN PLUS 2 PIC 9(09) USING CLIENTES-FONE
@@ -93,6 +100,7 @@
                END-IF.
 
        1100-MONTATELA.
+            MOVE 0 TO WRK-QTREGISTROS.
             DISPLAY TELA.
             ACCEPT MENU.
 
@@ -109,6 +117,8 @@
                 PERFORM 8000-EXCLUIR
               WHEN 5
                 PERFORM 9000-RELATORIOTELA
+              WHEN 6
+                PERFORM 9100-RELATORIODISCO
               WHEN OTHER
                 IF WRK-OPCAO NOT EQUAL 'X'
                     DISPLAY 'ENTRE COM OPCAO CORRETA'
@@ -118,7 +128,6 @@
 
        3000-FINALIZAR.
              CLOSE CLIENTES.
-
 
        5000-INCLUIR.
              MOVE 'MODULO - INCLUSAO ' TO WRK-MODULO.
@@ -217,6 +226,33 @@
 
                    END-PERFORM
              END-READ.
+               MOVE 'REGISTROS LIDOS ' TO WRK-MSGERRO.
+               MOVE WRK-QTREGISTROS TO WRK-MSGERRO(17:05).
+               ACCEPT MOSTRA-ERRO.
+
+
+
+       9100-RELATORIODISCO.
+             MOVE 'MODULO - RELATORIO ' TO WRK-MODULO.
+             DISPLAY TELA.
+             MOVE 12345 TO CLIENTES-FONE.
+             START CLIENTES KEY EQUAL CLIENTES-FONE.
+             READ CLIENTES
+                 INVALID KEY
+                     MOVE 'NENHUM REGISTRO ENCONTRADO' TO WRK-MSGERRO
+                  NOT INVALID KEY
+                   OPEN OUTPUT RELATO
+                   PERFORM UNTIL CLIENTES-STATUS = 10
+                     ADD 1 TO WRK-QTREGISTROS
+                         MOVE CLIENTES-REG TO RELATO-REG
+                         WRITE RELATO-REG
+                     READ CLIENTES NEXT
+                   END-PERFORM
+      *                MOVE 'REGISTROS LIDOS ' TO RELATO-REG
+      *                MOVE WRK-QTREGISTROS    TO RELATO-REG(18:05)
+      *                WRITE RELATO-REG
+                     CLOSE RELATO
+                END-READ.
                MOVE 'REGISTROS LIDOS ' TO WRK-MSGERRO.
                MOVE WRK-QTREGISTROS TO WRK-MSGERRO(17:05).
                ACCEPT MOSTRA-ERRO.
